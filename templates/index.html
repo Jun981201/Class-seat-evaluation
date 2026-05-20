@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课堂管理工具</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>课堂管理工具</h1>
+    </header>
+
+    <!-- ========== 功能区 A：座位表 & 评价打分表 ========== -->
+    <section class="card" id="section-a">
+        <h2>📋 座位表 & 评价打分表</h2>
+        <p class="subtitle">上传每周学生名单 → 选择班级和项目 → 生成座位表和评价表</p>
+
+        <!-- Upload -->
+        <div class="upload-area" id="upload-area-a">
+            <input type="file" id="list-file" accept=".xls,.xlsx" hidden>
+            <div class="upload-hint" onclick="$('list-file').click()">
+                <span class="upload-icon">📁</span>
+                <span>点击上传学生名单</span>
+                <span class="upload-sub">如：25学年第二学期第X周XXX学生名单.xls</span>
+            </div>
+        </div>
+        <div class="upload-status" id="upload-status-a"></div>
+
+        <!-- Selection & Generate (hidden until upload) -->
+        <div id="panel-a" style="display:none;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>班级</label>
+                    <select id="class-select-a"></select>
+                </div>
+                <div class="form-group">
+                    <label>项目</label>
+                    <select id="project-select-a"><option value="">全部学生</option></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>学校名称</label>
+                    <input type="text" id="school-name-a" placeholder="自动读取或手动输入">
+                </div>
+                <div class="form-group">
+                    <label>评价表模板</label>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <select id="template-select-a" style="flex:1;"><option value="">加载中...</option></select>
+                        <button class="btn btn-secondary" onclick="deleteTemplate()" style="padding:8px 10px;font-size:12px;white-space:nowrap;" title="删除当前模板">🗑</button>
+                        <button class="btn btn-secondary" onclick="editTemplate()" style="padding:8px 10px;font-size:12px;white-space:nowrap;" title="编辑当前模板">✎</button>
+                        <button class="btn btn-secondary" onclick="$('template-file').click()" style="padding:8px 12px;font-size:12px;white-space:nowrap;">+ 上传新模板</button>
+                    </div>
+                    <input type="file" id="template-file" accept=".xlsx" hidden>
+                    <div class="upload-status" id="template-upload-status"></div>
+                </div>
+            </div>
+
+            <!-- Template Preview & Edit Panel -->
+            <div id="template-preview" class="card" style="display:none;margin-top:12px;padding:16px;background:#f8fafc;">
+                <h3 style="margin-bottom:8px;">📋 模板预览</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>模板名称（下拉显示）</label>
+                        <input type="text" id="tpl-edit-name">
+                    </div>
+                    <div class="form-group">
+                        <label>标题（Excel表头）</label>
+                        <input type="text" id="tpl-edit-title">
+                    </div>
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:13px;color:#475569;">列定义</label>
+                    <div id="tpl-columns-preview" style="max-height:200px;overflow-y:auto;font-size:12px;"></div>
+                </div>
+                <div id="tpl-group-preview" style="margin-bottom:8px;font-size:12px;"></div>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button class="btn btn-primary" onclick="saveTemplate()">确认保存</button>
+                    <button class="btn btn-secondary" onclick="cancelTemplate()">取消</button>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>排列方式</label>
+                    <select id="arrange-mode-a">
+                        <option value="random">随机排列</option>
+                        <option value="gender_alternate">男女间隔排列</option>
+                        <option value="same_gender">同性别排列</option>
+                    </select>
+                </div>
+                <div class="form-group" style="justify-content:flex-end;flex-direction:row;align-items:center;">
+                    <label><input type="checkbox" id="gen-duty-a" checked> 值日安排</label>
+                </div>
+            </div>
+            <div class="student-summary" id="summary-a" style="display:none;">
+                <span>已选 <strong id="count-a">0</strong> 人</span>
+                <span style="margin-left:16px;">男 <strong id="male-a">0</strong></span>
+                <span style="margin-left:16px;">女 <strong id="female-a">0</strong></span>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="previewA()">👁 预览座位</button>
+                <button class="btn btn-primary" onclick="genSeating()">📥 下载座位表</button>
+                <button class="btn btn-primary" onclick="genEval()">📥 下载评价表</button>
+            </div>
+            <div id="preview-a"></div>
+        </div>
+    </section>
+
+    <!-- ========== 功能区 B：评语生成 ========== -->
+    <section class="card" id="section-b">
+        <h2>💬 评语自动生成</h2>
+        <p class="subtitle">上传成绩导入模板 → 自动根据成绩等级填写评语 → 下载</p>
+
+        <div class="upload-area" id="upload-area-b">
+            <input type="file" id="grades-file" accept=".xls,.xlsx" hidden>
+            <div class="upload-hint" onclick="$('grades-file').click()">
+                <span class="upload-icon">📁</span>
+                <span>点击上传成绩导入模板</span>
+                <span class="upload-sub">需包含学校、年级、班级、姓名、性别、学号、成绩列</span>
+            </div>
+        </div>
+        <div class="upload-status" id="upload-status-b"></div>
+        <div id="panel-b" style="display:none;">
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="downloadComments()">📥 下载评语Excel</button>
+            </div>
+            <div id="preview-b"></div>
+        </div>
+    </section>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+[
+  {
+    "columns": [
+      {
+        "header": "学号",
+        "width": 3.875,
+        "teacher": "",
+        "rule": ""
+      },
+      {
+        "header": "姓名",
+        "width": 6.875,
+        "teacher": "",
+        "rule": ""
+      },
+      {
+        "header": "性别",
+        "width": 4,
+        "teacher": "",
+        "rule": ""
+      },
+      {
+        "header": "三视图",
+        "rule": "1.5/1/0.5",
+        "teacher": "王",
+        "width": 9.875
+      },
+      {
+        "header": "投射杆",
+        "rule": "1/0.6/0.2",
+        "teacher": "王",
+        "width": 9.375
+      },
+      {
+        "header": "程序设计",
+        "rule": "1/0.6/0.2",
+        "teacher": "冯",
+        "width": 10.125
+      },
+      {
+        "header": "规范操作",
+        "rule": "1.5\\1\\0.5\\0",
+        "teacher": "王、冯、孟",
+        "width": 11.125
+      },
+      {
+        "header": "收纳值日",
+        "rule": "1\\0.6\\0.2",
+        "teacher": "王、冯、孟",
+        "width": 10.375
+      },
+      {
+        "header": "小结",
+        "rule": "",
+        "teacher": "",
+        "width": 15.25
+      },
+      {
+        "header": "考核",
+        "rule": "",
+        "teacher": "",
+        "width": 9.75
+      }
+    ],
+    "group_section": {
+      "groups": [
+        {
+          "header": "作品安装",
+          "rule": "1/0.6/0.2",
+          "teacher": "孟"
+        },
+        {
+          "header": "创意美观",
+          "rule": "1/0.6/0.2",
+          "teacher": "冯"
+        },
+        {
+          "header": "功能测试",
+          "rule": "1/0.6/0.2",
+          "teacher": "冯"
+        },
+        {
+          "header": "团队合作",
+          "rule": "1\\0.6\\0.2",
+          "teacher": "王、冯、孟"
+        }
+      ],
+      "num_groups": 8
+    },
+    "id": "catapult",
+    "name": "投石车项目",
+    "remark_col": "备注",
+    "remark_col2_width": 9,
+    "remark_col_width": 17.875,
+    "score_col": "总成绩",
+    "score_col_width": 11.375,
+    "title": "黄浦劳技中心投石车项目过程性评价表",
+    "title_font": "华文新魏",
+    "title_size": 18
+  },
+  {
+    "columns": [
+      {
+        "header": "学号",
+        "rule": "",
+        "teacher": "01",
+        "width": 4.75
+      },
+      {
+        "header": "姓名",
+        "rule": "",
+        "teacher": "王宸佑",
+        "width": 8.5
+      },
+      {
+        "header": "性别",
+        "rule": "",
+        "teacher": "男",
+        "width": 5.875
+      },
+      {
+        "header": "工具收纳     (-)",
+        "rule": "",
+        "teacher": "",
+        "width": 4.625
+      },
+      {
+        "header": "切片       1/.6/.2",
+        "rule": "",
+        "teacher": "",
+        "width": 8.375
+      },
+      {
+        "header": "三维建模特征\\扫掠",
+        "rule": "",
+        "teacher": "",
+        "width": 5
+      },
+      {
+        "header": "团队协作+\\-",
+        "rule": "",
+        "teacher": "",
+        "width": 5
+      },
+      {
+        "header": "操作规范(-)",
+        "rule": "",
+        "teacher": "",
+        "width": 8.875
+      },
+      {
+        "header": "建模打印.5-1.5+\\-",
+        "rule": "",
+        "teacher": "",
+        "width": 13
+      },
+      {
+        "header": "小组作品总分",
+        "rule": "",
+        "teacher": "",
+        "width": 9.5
+      },
+      {
+        "header": "考核",
+        "rule": "",
+        "teacher": "",
+        "width": 5.25
+      },
+      {
+        "header": "个人作品",
+        "rule": "",
+        "teacher": "",
+        "width": 5.125
+      },
+      {
+        "header": "总分",
+        "rule": "",
+        "teacher": "",
+        "width": 7.5
+      }
+    ],
+    "group_section": null,
+    "id": "tpl_6b863ae7",
+    "name": "3D台灯项目",
+    "remark_col": "备注",
+    "remark_col2_width": 13,
+    "remark_col_width": 13,
+    "score_col": "总成绩",
+    "score_col_width": 13,
+    "title": "黄浦劳技中心3D项目高二学生课堂评价记录单",
+    "title_font": "华文新魏",
+    "title_size": 18
+  }
+]

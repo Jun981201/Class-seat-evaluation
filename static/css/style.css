@@ -1,0 +1,318 @@
+/* ── Global ── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: #f0f4f8;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ── Header ── */
+header {
+    text-align: center;
+    padding: 30px 0 20px;
+}
+header h1 {
+    font-size: 28px;
+    color: #1a365d;
+    margin-bottom: 6px;
+}
+header p {
+    color: #64748b;
+    font-size: 14px;
+}
+.subtitle {
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+/* ── Card ── */
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.card h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: #1a365d;
+}
+.card h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+/* ── Upload Area ── */
+.upload-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+}
+.upload-area:hover {
+    border-color: #3b82f6;
+    background: #f8fafc;
+}
+.upload-area.dragover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    border-style: solid;
+}
+.upload-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+.upload-icon { font-size: 36px; }
+.upload-sub { font-size: 12px; color: #94a3b8; }
+
+.upload-status {
+    margin-top: 10px;
+    font-size: 14px;
+}
+.upload-status.success { color: #16a34a; }
+.upload-status.error { color: #dc2626; }
+.upload-status.loading { color: #3b82f6; }
+
+/* ── Student Summary ── */
+.student-summary {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+.summary-item {
+    font-size: 14px;
+}
+.summary-item .label {
+    color: #64748b;
+}
+
+/* ── Student Table ── */
+.student-table-wrap {
+    margin-top: 16px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+#student-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+#student-table th, #student-table td {
+    padding: 6px 12px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+#student-table th {
+    background: #f1f5f9;
+    color: #475569;
+    position: sticky;
+    top: 0;
+}
+
+/* ── Tabs ── */
+.tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 20px;
+}
+.tab {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #64748b;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color .2s, border-color .2s;
+}
+.tab.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+    font-weight: 600;
+}
+.tab:hover { color: #1e293b; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Forms ── */
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 160px;
+}
+.form-group label {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 500;
+}
+.form-group input[type="text"],
+.form-group select {
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color .2s;
+}
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,.15);
+}
+.form-group input[type="checkbox"] {
+    margin-right: 6px;
+}
+
+.hint {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+/* ── Buttons ── */
+.btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+.btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background .2s, transform .1s;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+    background: #3b82f6;
+    color: #fff;
+}
+.btn-primary:hover { background: #2563eb; }
+.btn-secondary {
+    background: #e2e8f0;
+    color: #475569;
+}
+.btn-secondary:hover { background: #cbd5e1; }
+.btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* ── Preview ── */
+.preview-area {
+    margin-top: 20px;
+}
+
+/* Seating grid preview */
+.seating-grid {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    gap: 4px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+.seat-cell {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.seat-cell.female { background: #fce4ec; }
+.seat-cell.male { background: #e3f2fd; }
+.seat-cell.empty { background: #f8fafc; border-style: dashed; }
+.seat-cell .seat-name { font-weight: 500; }
+.seat-cell .seat-id { font-size: 10px; color: #64748b; }
+.seat-aisle { display: flex; align-items: center; justify-content: center; color: #cbd5e1; font-size: 11px; }
+.podium-row {
+    text-align: center;
+    padding: 10px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    margin-top: 8px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* Comments table */
+.comments-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 12px;
+}
+.comments-table th, .comments-table td {
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+.comments-table th {
+    background: #f1f5f9;
+    position: sticky;
+    top: 0;
+}
+.comments-table td.comment {
+    text-align: left;
+    max-width: 300px;
+    font-size: 12px;
+}
+.grade-优秀 { color: #16a34a; font-weight: 600; }
+.grade-良好 { color: #2563eb; font-weight: 600; }
+.grade-合格 { color: #d97706; font-weight: 600; }
+.grade-需努力 { color: #dc2626; font-weight: 600; }
+
+/* ── Toast ── */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+    z-index: 1000;
+}
+.toast.show { opacity: 1; }
+.toast.success { background: #16a34a; }
+.toast.error { background: #dc2626; }
