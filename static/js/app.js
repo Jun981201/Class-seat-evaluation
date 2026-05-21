@@ -143,9 +143,9 @@ function showTemplatePreview(config) {
     // Group section info
     var gs = config.group_section;
     if (gs && gs.groups) {
-        var ghtml = '<label style=\"font-size:13px;color:#475569;\">小组评分 (' + gs.num_groups + '组)</label><div>';
+        var ghtml = '<label style="font-size:13px;color:#475569;">小组评分 (' + gs.num_groups + '组)</label><div class="template-group-tags">';
         for (var j = 0; j < gs.groups.length; j++) {
-            ghtml += '<span style=\"margin:2px;display:inline-block;background:#e2e8f0;padding:2px 6px;border-radius:4px;\">' +
+            ghtml += '<span class="template-group-tag">' +
                 esc(gs.groups[j].header) + ' <small>' + esc(gs.groups[j].rule || '') + '</small></span>';
         }
         ghtml += '</div>';
@@ -393,7 +393,7 @@ function renderPreviewA(data) {
     // Classroom grid: rows 5-12, cols B-F
     var rows = [5,6,7,8,9,10,11,12];
     var cols = ['B','C','D','E','F'];
-    var html = '<div style="margin-top:16px; overflow-x:auto;"><table style="border-collapse:collapse;margin:0 auto;font-size:11px;">';
+    var html = '<div class="seating-preview-wrap"><table>';
 
     for (var ri = 0; ri < rows.length; ri++) {
         var r = rows[ri];
@@ -404,25 +404,25 @@ function renderPreviewA(data) {
             var p = posMap[key];
 
             if (c === 'D') {
-                html += '<td style="width:20px;"></td>';  // aisle
+                html += '<td class="seat-aisle"></td>';
             } else if (p) {
-                var cls = p.student.gender === '女' ? 'seat-cell female' : 'seat-cell male';
-                html += '<td class="' + cls + '" style="font-size:10px;padding:2px 4px;min-width:50px;text-align:center;">' +
+                var genderCls = p.student.gender === '女' ? 'female' : 'male';
+                html += '<td class="seat-cell ' + genderCls + '">' +
                     p.student.id + ' ' + p.student.name + '</td>';
             } else {
-                html += '<td style="border:1px dashed #e2e8f0;padding:2px;text-align:center;color:#cbd5e1;font-size:10px;">空</td>';
+                html += '<td class="seat-cell empty-seat">空</td>';
             }
         }
         html += '</tr>';
         // After last desk row (12), add podium indicator
         if (r === 12) {
-            html += '<tr><td colspan="5" style="text-align:center;padding:4px;background:#f1f5f9;font-size:12px;color:#64748b;">🏫 讲  台</td></tr>';
+            html += '<tr><td colspan="5" class="podium-row">🏫 讲  台</td></tr>';
         }
     }
     html += '</table>';
 
     if (data.unassigned && data.unassigned.length > 0) {
-        html += '<div style="margin-top:8px;font-size:11px;color:#dc2626;">超出28人：' +
+        html += '<div class="unassigned-warning">超出28人：' +
             data.unassigned.map(function(s) { return s.name; }).join('、') + '</div>';
     }
     html += '</div>';
@@ -506,9 +506,8 @@ $('grades-file').addEventListener('change', function() {
         $('panel-b').style.display = 'block';
 
         // Show preview table
-        var html = '<div style="margin-top:12px;">';
-        html += '<table class="comments-table"><thead><tr>' +
-            '<th>学号</th><th>姓名</th><th>性别</th><th>成绩</th><th style="text-align:left;">评语</th>' +
+        var html = '<div class="comments-table-wrap"><table class="comments-table"><thead><tr>' +
+            '<th>学号</th><th>姓名</th><th>性别</th><th>成绩</th><th>评语</th>' +
             '</tr></thead><tbody>';
         for (var i = 0; i < data.students.length; i++) {
             var s = data.students[i];
@@ -517,7 +516,7 @@ $('grades-file').addEventListener('change', function() {
                 '<td>' + s.name + '</td>' +
                 '<td>' + s.gender + '</td>' +
                 '<td class="grade-' + s.grade_level + '">' + (s.grade_level || '-') + '</td>' +
-                '<td class="comment">' + (s.comment || '') + '</td>' +
+                '<td class="comment-cell">' + (s.comment || '') + '</td>' +
                 '</tr>';
         }
         html += '</tbody></table></div>';

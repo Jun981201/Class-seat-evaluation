@@ -513,6 +513,7 @@ def parse_grades_file(filepath_or_bytes, is_xls=False):
             gender = str(ws.cell_value(r, 4)).strip()
             sid = str(ws.cell_value(r, 5)).strip()
             grade_level = str(ws.cell_value(r, 6)).strip()
+            keywords = str(ws.cell_value(r, 7)).strip() if ws.ncols > 7 else ''
 
             if not name or not sid:
                 continue
@@ -520,7 +521,7 @@ def parse_grades_file(filepath_or_bytes, is_xls=False):
             students.append({
                 'school': school, 'grade': grade, 'class': class_name,
                 'name': name, 'gender': gender, 'id': sid.zfill(2),
-                'grade_level': grade_level, 'comment': '',
+                'grade_level': grade_level, 'keywords': keywords, 'comment': '',
             })
 
         if students:
@@ -552,6 +553,7 @@ def parse_grades_file(filepath_or_bytes, is_xls=False):
             gender = str(ws.cell(row=r, column=5).value or '').strip()
             sid = str(ws.cell(row=r, column=6).value or '').strip()
             grade_level = str(ws.cell(row=r, column=7).value or '').strip()
+            keywords = str(ws.cell(row=r, column=8).value or '').strip()
 
             if not name or not sid:
                 continue
@@ -559,7 +561,7 @@ def parse_grades_file(filepath_or_bytes, is_xls=False):
             students.append({
                 'school': school, 'grade': grade, 'class': class_name,
                 'name': name, 'gender': gender, 'id': sid.zfill(2),
-                'grade_level': grade_level, 'comment': '',
+                'grade_level': grade_level, 'keywords': keywords, 'comment': '',
             })
 
         if students:
@@ -912,7 +914,11 @@ def upload_grades():
         # Generate comments for each student
         for s in students:
             s['comment'] = CommentGenerator.generate_comment(
-                s.get('grade_level', '良好'), s.get('name'), s.get('gender'))
+                s.get('grade_level', '良好'),
+                name=s.get('name'),
+                gender=s.get('gender'),
+                keywords=s.get('keywords', ''),
+            )
 
         # Generate Excel
         output_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'output')

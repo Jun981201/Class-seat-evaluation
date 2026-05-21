@@ -9,13 +9,16 @@
 <body>
 <div class="container">
     <header>
+        <div class="header-icon">🏫</div>
         <h1>课堂管理工具</h1>
     </header>
 
-    <!-- ========== 功能区 A：座位表 & 评价打分表 ========== -->
+    <!-- ========== Section A: Seating & Evaluation ========== -->
     <section class="card" id="section-a">
-        <h2>📋 座位表 & 评价打分表</h2>
-        <p class="subtitle">上传每周学生名单 → 选择班级和项目 → 生成座位表和评价表</p>
+        <div class="card-header">
+            <h2><span class="card-icon seating">📋</span>座位表 & 评价打分表</h2>
+            <p class="subtitle">上传每周学生名单 → 选择班级和项目 → 生成座位表和评价表</p>
+        </div>
 
         <!-- Upload -->
         <div class="upload-area" id="upload-area-a">
@@ -49,9 +52,9 @@
                     <label>评价表模板</label>
                     <div style="display:flex;gap:8px;align-items:center;">
                         <select id="template-select-a" style="flex:1;"><option value="">加载中...</option></select>
-                        <button class="btn btn-secondary" onclick="deleteTemplate()" style="padding:8px 10px;font-size:12px;white-space:nowrap;" title="删除当前模板">🗑</button>
-                        <button class="btn btn-secondary" onclick="editTemplate()" style="padding:8px 10px;font-size:12px;white-space:nowrap;" title="编辑当前模板">✎</button>
-                        <button class="btn btn-secondary" onclick="$('template-file').click()" style="padding:8px 12px;font-size:12px;white-space:nowrap;">+ 上传新模板</button>
+                        <button class="btn btn-secondary btn-xs" onclick="deleteTemplate()" title="删除当前模板">🗑</button>
+                        <button class="btn btn-secondary btn-xs" onclick="editTemplate()" title="编辑当前模板">✎</button>
+                        <button class="btn btn-secondary btn-xs" onclick="$('template-file').click()">+ 上传新模板</button>
                     </div>
                     <input type="file" id="template-file" accept=".xlsx" hidden>
                     <div class="upload-status" id="template-upload-status"></div>
@@ -59,8 +62,8 @@
             </div>
 
             <!-- Template Preview & Edit Panel -->
-            <div id="template-preview" class="card" style="display:none;margin-top:12px;padding:16px;background:#f8fafc;">
-                <h3 style="margin-bottom:8px;">📋 模板预览</h3>
+            <div id="template-preview" class="template-panel">
+                <h3>📋 模板预览</h3>
                 <div class="form-row">
                     <div class="form-group">
                         <label>模板名称（下拉显示）</label>
@@ -72,13 +75,13 @@
                     </div>
                 </div>
                 <div style="margin-bottom:8px;">
-                    <label style="font-size:13px;color:#475569;">列定义</label>
+                    <label style="font-size:13px;color:#64748b;">列定义</label>
                     <div id="tpl-columns-preview" style="max-height:200px;overflow-y:auto;font-size:12px;"></div>
                 </div>
                 <div id="tpl-group-preview" style="margin-bottom:8px;font-size:12px;"></div>
                 <div style="display:flex;gap:8px;margin-top:12px;">
-                    <button class="btn btn-primary" onclick="saveTemplate()">确认保存</button>
-                    <button class="btn btn-secondary" onclick="cancelTemplate()">取消</button>
+                    <button class="btn btn-primary btn-sm" onclick="saveTemplate()">确认保存</button>
+                    <button class="btn btn-secondary btn-sm" onclick="cancelTemplate()">取消</button>
                 </div>
             </div>
             <div class="form-row">
@@ -96,22 +99,24 @@
             </div>
             <div class="student-summary" id="summary-a" style="display:none;">
                 <span>已选 <strong id="count-a">0</strong> 人</span>
-                <span style="margin-left:16px;">男 <strong id="male-a">0</strong></span>
-                <span style="margin-left:16px;">女 <strong id="female-a">0</strong></span>
+                <span>男 <strong id="male-a">0</strong></span>
+                <span>女 <strong id="female-a">0</strong></span>
             </div>
             <div class="btn-row">
                 <button class="btn btn-secondary" onclick="previewA()">👁 预览座位</button>
                 <button class="btn btn-primary" onclick="genSeating()">📥 下载座位表</button>
-                <button class="btn btn-primary" onclick="genEval()">📥 下载评价表</button>
+                <button class="btn btn-success" onclick="genEval()">📥 下载评价表</button>
             </div>
-            <div id="preview-a"></div>
+            <div id="preview-a" class="preview-area"></div>
         </div>
     </section>
 
-    <!-- ========== 功能区 B：评语生成 ========== -->
+    <!-- ========== Section B: Comment Generation ========== -->
     <section class="card" id="section-b">
-        <h2>💬 评语自动生成</h2>
-        <p class="subtitle">上传成绩导入模板 → 自动根据成绩等级填写评语 → 下载</p>
+        <div class="card-header">
+            <h2><span class="card-icon comments">💬</span>评语自动生成</h2>
+            <p class="subtitle">上传成绩导入模板 → 自动根据成绩等级填写评语 → 下载</p>
+        </div>
 
         <div class="upload-area" id="upload-area-b">
             <input type="file" id="grades-file" accept=".xls,.xlsx" hidden>
@@ -124,9 +129,9 @@
         <div class="upload-status" id="upload-status-b"></div>
         <div id="panel-b" style="display:none;">
             <div class="btn-row">
-                <button class="btn btn-primary" onclick="downloadComments()">📥 下载评语Excel</button>
+                <button class="btn btn-success" onclick="downloadComments()">📥 下载评语Excel</button>
             </div>
-            <div id="preview-b"></div>
+            <div id="preview-b" class="preview-area"></div>
         </div>
     </section>
 </div>

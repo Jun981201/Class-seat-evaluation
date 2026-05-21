@@ -1,9 +1,7 @@
-"""Auto-generate evaluation comments based on grade levels."""
+"""Auto-generate evaluation comments based on grade levels and optional keywords."""
 import random
-import xlrd
-from pathlib import Path
 
-# Comment templates by grade level - extracted from real teacher comments
+# Comment templates by grade level
 COMMENT_TEMPLATES = {
     '优秀': [
         '学习态度端正，课堂表现突出，善于发现并解决技术问题。',
@@ -56,43 +54,106 @@ COMMENT_TEMPLATES = {
     ],
 }
 
+# Keyword integration patterns — {keyword} is replaced with the actual keyword
+KEYWORD_PHRASES = {
+    '优秀': [
+        '在{keyword}方面表现突出，能力出色',
+        '在{keyword}方面有很强的创造力和执行力',
+        '在{keyword}方面起到了示范引领作用',
+        '在{keyword}上表现优异，值得表扬',
+        '{keyword}能力突出，是同学们的榜样',
+        '在{keyword}方面展现了出色的天赋和努力',
+    ],
+    '良好': [
+        '在{keyword}方面表现较好，有一定基础',
+        '在{keyword}方面能按时完成任务',
+        '{keyword}方面有进步，继续保持',
+        '在{keyword}上表现稳定，希望继续提升',
+        '在{keyword}方面基本达标，还有提升空间',
+    ],
+    '合格': [
+        '需要加强{keyword}方面的投入与练习',
+        '在{keyword}方面需要更多主动性和坚持',
+        '{keyword}方面的表现还有较大提升空间',
+        '希望在{keyword}上投入更多精力',
+        '在{keyword}方面需端正态度，认真对待',
+    ],
+    '需努力': [
+        '在{keyword}方面表现较差，亟需改进',
+        '{keyword}方面多次未达标，需要严格要求自己',
+        '在{keyword}方面缺乏基本投入，需深刻反思',
+        '亟需在{keyword}方面做出实质性改变',
+    ],
+}
 
 class CommentGenerator:
-    """Generate evaluation comments based on grade level."""
+    """Generate evaluation comments based on grade level and optional keywords."""
 
     @staticmethod
-    def generate_comment(grade, student_name=None, gender=None):
+    def generate_comment(grade, name=None, gender=None, keywords=None):
         """
-        Generate a comment based on grade level.
+        Generate a comment based on grade level and optional keywords.
 
         Args:
             grade: '优秀', '良好', '合格', or '需努力'
-            student_name: optional student name for personalization
+            name: optional student name
             gender: optional, for pronoun selection
+            keywords: optional comma/space-separated keywords from template
 
         Returns:
             str: generated comment
         """
+        kw = (keywords or '').strip()
+
+        if kw:
+            return CommentGenerator._generate_keyword_comment(grade, kw)
+        else:
+            templates = COMMENT_TEMPLATES.get(grade, COMMENT_TEMPLATES['良好'])
+            return random.choice(templates)
+
+    @staticmethod
+    def _generate_keyword_comment(grade, keywords):
+        """Generate a comment that incorporates the provided keywords."""
+        # Split multiple keywords (comma, Chinese comma, space, semicolon)
+        import re
+        kws = re.split(r'[,，、\s;；]+', keywords)
+        kws = [k.strip() for k in kws if k.strip()]
+        if not kws:
+            templates = COMMENT_TEMPLATES.get(grade, COMMENT_TEMPLATES['良好'])
+            return random.choice(templates)
+
+        # Take the first keyword as primary
+        primary_kw = kws[0]
+
+        # Pick a keyword phrase for the grade level
+        phrases = KEYWORD_PHRASES.get(grade, KEYWORD_PHRASES['良好'])
+        kw_phrase = random.choice(phrases).format(keyword=primary_kw)
+
+        # Pick a random grade-level comment as the second sentence
         templates = COMMENT_TEMPLATES.get(grade, COMMENT_TEMPLATES['良好'])
-        comment = random.choice(templates)
-        return comment
+        grade_comment = random.choice(templates)
+
+        # If there are multiple keywords, mention them in a follow-up
+        if len(kws) > 1:
+            extra = '同时需关注：' + '、'.join(kws[1:]) + '。'
+            return f'{kw_phrase}。{grade_comment}{extra}'
+        else:
+            return f'{kw_phrase}。{grade_comment}'
 
     @classmethod
     def generate_for_students(cls, students, reference_file=None):
         """
-        Generate comments for a list of students with grades.
-
-        Args:
-            students: list of dicts with keys: id, name, gender, grade
-            reference_file: optional path to .xls reference file for comment bank
-
-        Returns:
-            list of dicts with added 'comment' key
+        Generate comments for a list of students with grades and optional keywords.
         """
         result = []
         for s in students:
             grade = s.get('grade', '良好')
-            comment = cls.generate_comment(grade, s.get('name'), s.get('gender'))
+            comment = cls.generate_comment(
+                grade,
+                name=s.get('name'),
+                gender=s.get('gender'),
+                keywords=s.get('keywords', ''),
+            )
             s_copy = dict(s)
             s_copy['comment'] = comment
             result.append(s_copy)
@@ -102,23 +163,15 @@ class CommentGenerator:
     def generate_from_grades_file(cls, grades_file_path):
         """
         Read a grades import file and generate comments.
-
-        Args:
-            grades_file_path: path to .xls or .xlsx file with columns:
-                学校, 年级, 班级, 姓名, 性别, 学号, 成绩
-
-        Returns:
-            tuple: (students_list, metadata_dict)
-                students_list: [{school, grade, class, name, gender, id, grade_level, comment}]
-                metadata: {school, grade, class}
+        Columns: 学校, 年级, 班级, 姓名, 性别, 学号, 成绩, 评语
         """
         if str(grades_file_path).endswith('.xls'):
+            import xlrd
             wb = xlrd.open_workbook(grades_file_path)
             ws = wb.sheet_by_index(0)
             students = []
             metadata = {}
 
-            # Find header row (row with 学校)
             header_row = None
             for r in range(min(ws.nrows, 10)):
                 if str(ws.cell_value(r, 0)).strip() == '学校':
@@ -136,11 +189,12 @@ class CommentGenerator:
                 gender = str(ws.cell_value(r, 4)).strip()
                 student_id = str(ws.cell_value(r, 5)).strip()
                 grade_level = str(ws.cell_value(r, 6)).strip()
+                keywords = str(ws.cell_value(r, 7)).strip() if ws.ncols > 7 else ''
 
                 if not name or not student_id:
                     continue
 
-                comment = cls.generate_comment(grade_level, name, gender)
+                comment = cls.generate_comment(grade_level, name=name, gender=gender, keywords=keywords)
                 students.append({
                     'school': school,
                     'grade': grade,
@@ -149,6 +203,7 @@ class CommentGenerator:
                     'gender': gender,
                     'id': student_id,
                     'grade_level': grade_level,
+                    'keywords': keywords,
                     'comment': comment,
                 })
 
@@ -162,7 +217,6 @@ class CommentGenerator:
             return students, metadata
 
         else:
-            # For .xlsx files
             import openpyxl
             wb = openpyxl.load_workbook(grades_file_path)
             ws = wb.active
@@ -186,11 +240,12 @@ class CommentGenerator:
                 gender = str(ws.cell(row=r, column=5).value or '').strip()
                 student_id = str(ws.cell(row=r, column=6).value or '').strip()
                 grade_level = str(ws.cell(row=r, column=7).value or '').strip()
+                keywords = str(ws.cell(row=r, column=8).value or '').strip()
 
                 if not name or not student_id:
                     continue
 
-                comment = cls.generate_comment(grade_level, name, gender)
+                comment = cls.generate_comment(grade_level, name=name, gender=gender, keywords=keywords)
                 students.append({
                     'school': school,
                     'grade': grade,
@@ -199,6 +254,7 @@ class CommentGenerator:
                     'gender': gender,
                     'id': student_id,
                     'grade_level': grade_level,
+                    'keywords': keywords,
                     'comment': comment,
                 })
 
@@ -215,11 +271,6 @@ class CommentGenerator:
     def export_comments_excel(cls, students, output_path, metadata=None):
         """
         Export students with comments to the 成绩导入模板 Excel format.
-
-        Args:
-            students: list of dicts
-            output_path: file path for output
-            metadata: dict with school, grade, class info
         """
         import openpyxl
         from .template_engine import (
@@ -230,19 +281,16 @@ class CommentGenerator:
         ws = wb.active
         ws.title = '成绩导入'
 
-        # Column widths
         for col, w in zip(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
                           [14, 8, 8, 10, 6, 10, 10, 45]):
             ws.column_dimensions[col].width = w
 
-        # Instruction rows
         ws.cell(row=1, column=1, value='成绩表导入模板')
         ws.cell(row=2, column=1, value='1、请勿更改表格样式')
         ws.cell(row=3, column=1, value='2、所有列均为必填项，确保填写的信息与学生信息一致（班级、姓名、学号必须相同）')
         ws.cell(row=4, column=1, value='3、成绩栏可填写项为："优秀"、"良好"、"合格"、"需努力"')
         ws.cell(row=5, column=1, value='4、评语栏请将字数控制在100字以内，且尽量不使用换行')
 
-        # Header row
         headers = ['学校', '年级', '班级', '姓名', '性别', '学号', '成绩', '评语']
         for ci, h in enumerate(headers, 1):
             cell = ws.cell(row=7, column=ci, value=h)
@@ -250,7 +298,6 @@ class CommentGenerator:
             cell.alignment = ALIGN_CENTER
             cell.border = BORDER_THIN
 
-        # Data
         for si, s in enumerate(students):
             row = si + 8
             meta = metadata or {}
