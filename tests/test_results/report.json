@@ -1,0 +1,202 @@
+{
+  "pass": 39,
+  "fail": 0,
+  "checks": [
+    {
+      "name": "Page loads successfully (HTTP 200)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Page title is correct",
+      "pass": true,
+      "detail": "title='课堂管理工具'"
+    },
+    {
+      "name": "Header icon (.header-icon) present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Header h1 text visible",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Design tokens (CSS variables) loaded",
+      "pass": true,
+      "detail": "CSS custom properties detected"
+    },
+    {
+      "name": "Section A card exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Section B card exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Card headers with icons present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Card icon - seating present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Card icon - comments present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Upload area A exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Upload area B exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Upload hint text visible in A",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Upload area has file input (hidden)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "File input accepts .xls/.xlsx",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Panel A initially hidden",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Class select exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Project select exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "School name input exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Template select exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Arrange mode select has 3 options",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Arrange modes include same_gender",
+      "pass": true,
+      "detail": "options=['随机排列', '男女间隔排列', '同性别排列']"
+    },
+    {
+      "name": "Duty checkbox exists and checked by default",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Preview seating button exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Download seating button exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Download evaluation button exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Download comments button exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "GET /api/list-templates returns array",
+      "pass": true,
+      "detail": "type=list, count=2"
+    },
+    {
+      "name": "Templates have id and name fields",
+      "pass": true,
+      "detail": "first item keys=['columns_count', 'has_group', 'id', 'name', 'title']"
+    },
+    {
+      "name": "Toast element exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Toast shows on trigger",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Toast auto-hides after 2.5s",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "No JavaScript console errors",
+      "pass": true,
+      "detail": "errors=[]"
+    },
+    {
+      "name": "Primary button has gradient background",
+      "pass": true,
+      "detail": "bg=rgba(0, 0, 0, 0) linear-gradient(135deg, rgb(99, 102, 241), "
+    },
+    {
+      "name": "Cards have border-radius",
+      "pass": true,
+      "detail": "radius=18px"
+    },
+    {
+      "name": "Body uses Microsoft YaHei font stack",
+      "pass": true,
+      "detail": "font=\"Microsoft YaHei\", \"PingFang SC\", -apple-system, BlinkMacSystemFont, \"Segoe UI\","
+    },
+    {
+      "name": "Mobile viewport - container visible",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Mobile viewport - no horizontal overflow",
+      "pass": true,
+      "detail": "body=375 window=375"
+    },
+    {
+      "name": "Screenshot saved to E:\\vibe coding\\seating_tool\\tests\\test_results\\full_page.png",
+      "pass": true,
+      "detail": "size=91203 bytes"
+    }
+  ],
+  "timestamp": "2026-05-21 13:00:57"
+}
