@@ -1,6 +1,6 @@
 # Classroom Management Tool / 课堂管理工具
 
-Flask web app at `app.py` — run with `python app.py` (port 5050).
+Flask web app at `app.py` — run with `python app.py` (port 5051).
 
 ## Structure
 
