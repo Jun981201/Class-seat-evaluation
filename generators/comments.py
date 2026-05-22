@@ -1,5 +1,39 @@
 """Auto-generate evaluation comments based on grade levels and optional keywords."""
 import random
+import re
+
+# Evaluative suffixes that teachers may append to keywords — stripped during normalization.
+# Ordered longest-first so we match greedily (e.g. "需努力" before "好").
+EVALUATIVE_SUFFIXES = [
+    '需努力', '待加强', '不认真', '不太理想',
+    '较好', '很好', '良好', '较差', '很差', '较弱', '较强',
+    '认真', '优秀', '突出', '不足', '欠缺', '进步', '退步',
+    '一般', '尚可', '尚好', '偏弱', '偏慢',
+    '好', '差', '快', '慢', '强', '弱',
+]
+
+# Words indicating negative behavior — used to avoid pairing with skill praise
+_NEGATIVE_BEHAVIOR = ['开小差', '睡觉', '玩手机', '懒散', '浮躁', '被动',
+                       '违反课堂纪律', '干扰学习', '不做值日', '作业不交',
+                       '精神不集中', '投入度不够', '纪律意识差', '纪律意识淡薄']
+
+
+def _has_contradiction(text_a, text_b):
+    """Check if two texts contain semantically contradictory statements.
+
+    Returns True if one text mentions negative behaviors while the other
+    praises specific skills that logically conflict (e.g. a student who
+    slacks off can't simultaneously have fast modeling speed).
+    """
+    has_neg_a = any(w in text_a for w in _NEGATIVE_BEHAVIOR)
+    has_neg_b = any(w in text_b for w in _NEGATIVE_BEHAVIOR)
+    # Contradiction only when one side is negative and the other isn't
+    if has_neg_a and not has_neg_b:
+        return True
+    if has_neg_b and not has_neg_a:
+        return True
+    return False
+
 
 # Comment templates by grade level
 COMMENT_TEMPLATES = {
@@ -34,7 +68,7 @@ COMMENT_TEMPLATES = {
     '合格': [
         '能完成老师布置的学习任务，但对学习投入度不足，对待学习较为被动、懒散。',
         '上课注意力不够集中，学习投入一般，主动性和合作意识亟需加强。希望端正学习态度，加以改进。',
-        '上课偶有开小差状况，能完成小组分配的工作。建模速度快，期待能向老师展示更优秀的一面。',
+        '上课偶有开小差状况，但能完成小组分配的工作。有一定动手能力，期待能向老师展示更优秀的一面。',
         '上课态度比较浮躁，但能按时完成老师布置的任务。动手实践能力需要进一步加强。',
         '课堂投入不够，偶尔会做与学习无关的事。希望端正学习态度，提高学习投入度。',
         '能完成基本任务，但缺乏主动探索精神。希望多向优秀同学学习，提高自己。',
@@ -90,6 +124,38 @@ class CommentGenerator:
     """Generate evaluation comments based on grade level and optional keywords."""
 
     @staticmethod
+    def _normalize_keywords(keywords_str):
+        """Clean teacher keywords by stripping evaluative suffixes.
+
+        Teachers often write notes like "绘画好" or "建模认真快" in the keywords
+        column. These evaluative suffixes clash with the templates (e.g. producing
+        "绘画好方面") and must be stripped to get clean topic names.
+
+        Returns a list of cleaned, deduplicated keyword strings.
+        """
+        kws = re.split(r'[,，、\s;；]+', keywords_str)
+        kws = [k.strip() for k in kws if k.strip()]
+        cleaned = []
+        for kw in kws:
+            prev = None
+            while prev != kw:
+                prev = kw
+                for suffix in EVALUATIVE_SUFFIXES:
+                    if kw.endswith(suffix) and len(kw) > len(suffix):
+                        kw = kw[:-len(suffix)]
+                        break
+            if kw.strip():
+                cleaned.append(kw.strip())
+        # Deduplicate while preserving order
+        seen = set()
+        result = []
+        for k in cleaned:
+            if k not in seen:
+                seen.add(k)
+                result.append(k)
+        return result
+
+    @staticmethod
     def generate_comment(grade, name=None, gender=None, keywords=None):
         """
         Generate a comment based on grade level and optional keywords.
@@ -103,37 +169,94 @@ class CommentGenerator:
         Returns:
             str: generated comment
         """
-        kw = (keywords or '').strip()
+        kw_str = (keywords or '').strip()
 
-        if kw:
-            return CommentGenerator._generate_keyword_comment(grade, kw)
+        if kw_str:
+            cleaned = CommentGenerator._normalize_keywords(kw_str)
+            raw = CommentGenerator._generate_keyword_comment(grade, cleaned)
         else:
             templates = COMMENT_TEMPLATES.get(grade, COMMENT_TEMPLATES['良好'])
-            return random.choice(templates)
+            raw = random.choice(templates)
+
+        return CommentGenerator._polish_comment(raw, grade)
 
     @staticmethod
     def _generate_keyword_comment(grade, keywords):
-        """Generate a comment that incorporates the provided keywords."""
-        import re
-        kws = re.split(r'[,，、\s;；]+', keywords)
-        kws = [k.strip() for k in kws if k.strip()]
-        if not kws:
+        """Generate a comment that incorporates the provided keywords.
+
+        Args:
+            grade: grade level string
+            keywords: list of cleaned keyword strings from _normalize_keywords
+        """
+        if not keywords:
             templates = COMMENT_TEMPLATES.get(grade, COMMENT_TEMPLATES['良好'])
             return random.choice(templates)
 
         # Use at most 3 keywords to keep the comment concise
-        selected = kws[:3]
+        selected = keywords[:3]
         joined_kws = '、'.join(selected)
 
         # Pick a keyword phrase for the grade level
         phrases = KEYWORD_PHRASES.get(grade, KEYWORD_PHRASES['良好'])
         kw_phrase = random.choice(phrases).format(keyword=joined_kws)
 
-        # Pick a random grade-level comment as the second sentence
+        # Pick a compatible grade-level comment
         templates = COMMENT_TEMPLATES.get(grade, COMMENT_TEMPLATES['良好'])
-        grade_comment = random.choice(templates)
+        grade_comment = CommentGenerator._pick_compatible_comment(
+            kw_phrase, templates, grade)
 
         return f'{kw_phrase}。{grade_comment}'
+
+    @staticmethod
+    def _pick_compatible_comment(kw_phrase, templates, grade):
+        """Pick a grade-level template that doesn't conflict with the keyword phrase.
+
+        Tries up to 5 times to avoid pairing a keyword phrase highlighting a
+        specific skill with a template that describes contradictory behavior
+        (e.g. "开小差" + skill praise in the same comment).
+        """
+        for _ in range(5):
+            candidate = random.choice(templates)
+            # Avoid pairing positive skill phrases with negative behavior mentions
+            if _has_contradiction(kw_phrase, candidate):
+                continue
+            return candidate
+        return random.choice(templates)
+
+    @staticmethod
+    def _polish_comment(raw, grade):
+        """Post-generation fluency check and cleanup.
+
+        Handles common issues:
+        - Residual evaluative words in keyword position (e.g. "xx好方面")
+        - Double punctuation
+        - Spacing issues
+        """
+        result = raw.strip()
+
+        # Fix residual evaluative-in-keyword patterns like "xx好方面", "xx快方面"
+        result = re.sub(r'(好|较好|很好|差|较差|快|慢|认真|强|弱)方面', '方面', result)
+        result = re.sub(r'(好|较好|很好|差|较差|快|慢|认真|强|弱)上', '上', result)
+        result = re.sub(r'(好|较好|很好|差|较差|快|慢|认真|强|弱)能力', '能力', result)
+
+        # Remove duplicate punctuation
+        result = re.sub(r'。+', '。', result)
+        result = re.sub(r'，+', '，', result)
+
+        # Ensure proper ending
+        if not result.endswith('。'):
+            result = result.rstrip('，。') + '。'
+
+        return result
+
+    @staticmethod
+    def _llm_polish(raw, grade):
+        """Placeholder for future LLM-based polish step.
+
+        When an LLM API is configured, this method can send the raw comment
+        for fluency review and return a polished version.
+        """
+        return raw
 
     @classmethod
     def generate_for_students(cls, students, reference_file=None):
