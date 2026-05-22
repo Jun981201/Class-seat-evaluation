@@ -5,9 +5,9 @@ import random
 COMMENT_TEMPLATES = {
     '优秀': [
         '学习态度端正，课堂表现突出，善于发现并解决技术问题。',
-        '在3D建模和小组活动中表现优异，能独立完成复杂建模任务，作品完成度高，富有创意。大胆心细，勇于尝试，可以挑战更有难度的创意设计来突破自我。',
+        '在3D建模和小组活动中表现优异，能独立完成复杂建模任务，作品完成度高，富有创意。胆大心细，勇于尝试，可以挑战更有难度的创意设计来突破自我。',
         '上课认真积极，善于思考和创新，小组贡献突出，承担了大部分的编程、建模和团队核心工作。始终保持积极的学习态度。',
-        '学习效率高，课堂表现活跃，善于思考。善于提问和思考，乐于探究新知识，富有创新精神，小组贡献突出。',
+        '学习效率高，课堂表现活跃，善于思考。乐于提问和探究新知识，富有创新精神，小组贡献突出。',
         '态度认真，能快速高质量完成任务，表现一直很稳定。有很强的工程思维，善于帮助小组同学解决实际问题。',
         '学习态度端正，课堂表现活跃，善于创新，善于思考与分析问题，是小组活动的核心骨干。',
         '动手能力强，建模速度快，有很强的学习能力。课堂表现积极，希望多在团队合作中发挥引领作用。',
@@ -33,7 +33,7 @@ COMMENT_TEMPLATES = {
     ],
     '合格': [
         '能完成老师布置的学习任务，但对学习投入度不足，对待学习较为被动、懒散。',
-        '上课注意力不够集中，学习投入一般，主动性和合作意识亟需加强。希望端正态度改进。',
+        '上课注意力不够集中，学习投入一般，主动性和合作意识亟需加强。希望端正学习态度，加以改进。',
         '上课偶有开小差状况，能完成小组分配的工作。建模速度快，期待能向老师展示更优秀的一面。',
         '上课态度比较浮躁，但能按时完成老师布置的任务。动手实践能力需要进一步加强。',
         '课堂投入不够，偶尔会做与学习无关的事。希望端正学习态度，提高学习投入度。',
@@ -41,7 +41,7 @@ COMMENT_TEMPLATES = {
         '上课偶尔开小差，学习态度不够稳定。但有一定潜力，需要更多自律。',
         '对待学习比较被动，需要老师督促。希望能提高主动性，积极参与课堂活动。',
         '基本能跟上教学进度，但深度不够。希望加强课后练习，巩固所学知识。',
-        '能在小组中完成分配的任务，但缺乏主动性。希望下次能担任更多责任。',
+        '能在小组中完成分配的任务，但缺乏主动性。希望下次能承担更多责任。',
     ],
     '需努力': [
         '学习态度不够端正，多次违反课堂纪律，上课常睡觉或玩手机，不参与小组学习活动。需认真反思学习态度。',
@@ -73,7 +73,7 @@ KEYWORD_PHRASES = {
     ],
     '合格': [
         '需要加强{keyword}方面的投入与练习',
-        '在{keyword}方面需要更多主动性和坚持',
+        '在{keyword}方面需要更加主动和坚持',
         '{keyword}方面的表现还有较大提升空间',
         '希望在{keyword}上投入更多精力',
         '在{keyword}方面需端正态度，认真对待',
@@ -114,7 +114,6 @@ class CommentGenerator:
     @staticmethod
     def _generate_keyword_comment(grade, keywords):
         """Generate a comment that incorporates the provided keywords."""
-        # Split multiple keywords (comma, Chinese comma, space, semicolon)
         import re
         kws = re.split(r'[,，、\s;；]+', keywords)
         kws = [k.strip() for k in kws if k.strip()]
@@ -122,23 +121,19 @@ class CommentGenerator:
             templates = COMMENT_TEMPLATES.get(grade, COMMENT_TEMPLATES['良好'])
             return random.choice(templates)
 
-        # Take the first keyword as primary
-        primary_kw = kws[0]
+        # Use at most 3 keywords to keep the comment concise
+        selected = kws[:3]
+        joined_kws = '、'.join(selected)
 
         # Pick a keyword phrase for the grade level
         phrases = KEYWORD_PHRASES.get(grade, KEYWORD_PHRASES['良好'])
-        kw_phrase = random.choice(phrases).format(keyword=primary_kw)
+        kw_phrase = random.choice(phrases).format(keyword=joined_kws)
 
         # Pick a random grade-level comment as the second sentence
         templates = COMMENT_TEMPLATES.get(grade, COMMENT_TEMPLATES['良好'])
         grade_comment = random.choice(templates)
 
-        # If there are multiple keywords, mention them in a follow-up
-        if len(kws) > 1:
-            extra = '同时需关注：' + '、'.join(kws[1:]) + '。'
-            return f'{kw_phrase}。{grade_comment}{extra}'
-        else:
-            return f'{kw_phrase}。{grade_comment}'
+        return f'{kw_phrase}。{grade_comment}'
 
     @classmethod
     def generate_for_students(cls, students, reference_file=None):
