@@ -12,6 +12,24 @@ EVALUATIVE_SUFFIXES = [
     '好', '差', '快', '慢', '强', '弱',
 ]
 
+# Words that are purely evaluative/descriptive — these are teacher notes masquerading
+# as keywords. When a keyword token matches one of these exactly (after suffix stripping),
+# it is discarded because it cannot form a natural "在X方面" phrase.
+_NON_TOPIC_WORDS = {
+    # Pure evaluative adjectives
+    '认真', '努力', '刻苦', '用功', '勤奋', '好学', '踏实',
+    '积极', '主动', '自觉', '自律', '专注', '细心', '耐心',
+    '被动', '消极', '懒散', '马虎', '粗心', '浮躁', '敷衍',
+    # Situation descriptions (not skill areas)
+    '带病', '生病', '请假', '迟到', '早退', '旷课', '病假',
+    '带病学习', '带病上课', '身体不适',
+    # Structural / filler
+    '方面', '的', '了', '在', '和', '与', '及', '等', '无',
+    '有', '是', '很', '较', '非常', '比较',
+    # Vague / meaningless
+    '表现', '情况', '状态', '综合', '整体', '其他',
+}
+
 # Words indicating negative behavior — used to avoid pairing with skill praise
 _NEGATIVE_BEHAVIOR = ['开小差', '睡觉', '玩手机', '懒散', '浮躁', '被动',
                        '违反课堂纪律', '干扰学习', '不做值日', '作业不交',
@@ -125,18 +143,20 @@ class CommentGenerator:
 
     @staticmethod
     def _normalize_keywords(keywords_str):
-        """Clean teacher keywords by stripping evaluative suffixes.
+        """Clean teacher keywords into valid topic names.
 
-        Teachers often write notes like "绘画好" or "建模认真快" in the keywords
-        column. These evaluative suffixes clash with the templates (e.g. producing
-        "绘画好方面") and must be stripped to get clean topic names.
+        Handles two common problems:
+        1. Topic+evaluation: "绘画好", "建模认真快" → strip suffixes → "绘画", "建模"
+        2. Pure evaluation/notes: "认真", "带病学习", "方面" → discarded entirely
 
-        Returns a list of cleaned, deduplicated keyword strings.
+        Returns a list of valid, deduplicated topic strings (may be empty).
         """
         kws = re.split(r'[,，、\s;；]+', keywords_str)
         kws = [k.strip() for k in kws if k.strip()]
+
         cleaned = []
         for kw in kws:
+            # Step 1: Strip evaluative suffixes from the end
             prev = None
             while prev != kw:
                 prev = kw
@@ -144,8 +164,26 @@ class CommentGenerator:
                     if kw.endswith(suffix) and len(kw) > len(suffix):
                         kw = kw[:-len(suffix)]
                         break
-            if kw.strip():
-                cleaned.append(kw.strip())
+
+            kw = kw.strip()
+            if not kw:
+                continue
+
+            # Step 2: Split on common delimiters that may remain inside the token
+            # (e.g. "个性化建模、方面" or "认真、建模" as a single token)
+            sub_parts = re.split(r'[,，、/]+', kw)
+            for part in sub_parts:
+                part = part.strip()
+                if not part:
+                    continue
+                # Step 3: Reject non-topic words
+                if part in _NON_TOPIC_WORDS:
+                    continue
+                # Step 4: Reject single-character remnants or pure digits
+                if len(part) < 2 and not part.isascii():
+                    continue
+                cleaned.append(part)
+
         # Deduplicate while preserving order
         seen = set()
         result = []
@@ -227,25 +265,36 @@ class CommentGenerator:
     def _polish_comment(raw, grade):
         """Post-generation fluency check and cleanup.
 
-        Handles common issues:
-        - Residual evaluative words in keyword position (e.g. "xx好方面")
-        - Double punctuation
-        - Spacing issues
+        Fixes template fragments that become broken when non-topic keywords
+        are filtered out, plus general punctuation/formatting issues.
         """
         result = raw.strip()
 
-        # Fix residual evaluative-in-keyword patterns like "xx好方面", "xx快方面"
-        result = re.sub(r'(好|较好|很好|差|较差|快|慢|认真|强|弱)方面', '方面', result)
-        result = re.sub(r'(好|较好|很好|差|较差|快|慢|认真|强|弱)上', '上', result)
-        result = re.sub(r'(好|较好|很好|差|较差|快|慢|认真|强|弱)能力', '能力', result)
+        # Remove broken template fragments where keyword was filtered out
+        # "在方面" "在、方面" "、方面" etc.
+        result = re.sub(r'在[、，,]*(方面|上|能力)', r'\1', result)
+        result = re.sub(r'[、，,]*(方面|上)\b', '', result)
+        # "需要加强方面的投入" → remove the orphan "方面"
+        result = re.sub(r'(加强|需要)[、，,]*(方面)', r'\1', result)
+        # Clean doubled prepositions
+        result = re.sub(r'在在', '在', result)
+
+        # Remove stray delimiters and empty clauses
+        result = re.sub(r'[、，,]\s*[、，,]', '，', result)
+        result = re.sub(r'。[、，,]', '。', result)
 
         # Remove duplicate punctuation
         result = re.sub(r'。+', '。', result)
         result = re.sub(r'，+', '，', result)
+        result = re.sub(r'、+', '、', result)
+
+        # Fix spacing around punctuation
+        result = re.sub(r'\s*，\s*', '，', result)
+        result = re.sub(r'\s*。\s*', '。', result)
 
         # Ensure proper ending
         if not result.endswith('。'):
-            result = result.rstrip('，。') + '。'
+            result = result.rstrip('，。、') + '。'
 
         return result
 
